@@ -1,0 +1,80 @@
+<html>
+<head>
+    <style>
+        .arc text {
+            font: 10px sans-serif;
+            text-anchor: middle;
+        }
+
+        .arc path {
+            stroke: #fff;
+        }
+
+        .title {
+            fill: teal;
+            font-weight: bold;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+<body>
+    <svg width="800" height="750"></svg>
+    <script>
+
+        var svg = d3.select("svg"),
+            width = svg.attr("width"),
+            height = svg.attr("height"),
+            radius = 275;
+        
+        var g = svg.append("g")
+                   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")"); 
+
+        var color = d3.scaleOrdinal(['#34ebdb','#cc0000','#cc3300','#cc6600','#cc9900','#cccc00',
+									'#99cc00','#66cc00','#33cc00','#00cc00','#00cc33','#00cc66','#00cc99',
+									'#00cccc','#0099cc','#0066cc','#0033cc','#0000cc','#3300cc','#6600cc',
+									'#9900cc','#cc00cc','#cc0099','#cc0066','#cc0033','#cc0000']);
+
+        var pie = d3.pie().value(function(d) { 
+                return d.average; 
+            });
+
+        var path = d3.arc()
+                     .outerRadius(radius - 5)
+                     .innerRadius(0);
+
+        var label = d3.arc()
+                      .outerRadius(radius)
+                      .innerRadius(radius - 80);
+
+        d3.csv("miniproj_english.csv", function(error, data) {
+            if (error) {
+                throw error;
+            }
+            var arc = g.selectAll(".arc")
+                       .data(pie(data))
+                       .enter().append("g")
+                       .attr("class", "arc");
+
+            arc.append("path")
+               .attr("d", path)
+               .attr("fill", function(d) { return color(d.data.letter); });
+        
+            console.log(arc)
+        
+            arc.append("text")
+               .attr("transform", function(d) { 
+                        return "translate(" + label.centroid(d) + ")"; 
+                })
+               .text(function(d) { return d.data.letter; });
+            });
+
+            svg.append("g")
+               .attr("transform", "translate(" + (width / 2 - 270) + "," + 80 + ")")
+               .append("text")
+               .text("Piechart displaying the average of each letter")
+               .attr("class", "title")
+			   .attr("font-size", 30)
+			   .style("fill", "black");
+    </script>
+</body>
+</html>
